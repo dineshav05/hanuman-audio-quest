@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Knowledge Ocean - Audio Quest</title>
+    <title>Knowledge Ocean - Audio Quest UI</title>
     <style>
         /* --- HOLOGRAPHIC HUD UI STYLES --- */
         :root {
@@ -12,6 +12,7 @@
             --hud-orange: #FF8C00;
             --panel-bg: rgba(10, 25, 47, 0.85);
             --text-light: #E6F1FF;
+            --btn-bg: rgba(0, 229, 255, 0.1);
         }
 
         body {
@@ -34,214 +35,199 @@
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(0, 229, 255, 0.2), inset 0 0 15px rgba(0, 229, 255, 0.1);
             width: 100%;
-            max-width: 500px;
-            padding: 30px;
+            max-width: 600px;
+            padding: 25px;
             text-align: center;
             position: relative;
-            overflow: hidden;
         }
 
-        /* Decorative HUD corner lines */
+        /* Decorative HUD corners */
         .hud-container::before, .hud-container::after {
-            content: ''; position: absolute; width: 40px; height: 40px;
+            content: ''; position: absolute; width: 30px; height: 30px;
             border: 3px solid var(--hud-orange); border-radius: 5px;
         }
         .hud-container::before { top: 10px; left: 10px; border-right: none; border-bottom: none; }
         .hud-container::after { bottom: 10px; right: 10px; border-left: none; border-top: none; }
 
-        h1 {
-            color: var(--hud-orange);
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        h2 {
-            color: var(--hud-blue);
-            font-size: 2rem;
-            margin: 0 0 20px 0;
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
-        }
-
-        .lyrics-box {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(0, 229, 255, 0.3);
+        h1 { color: var(--hud-orange); font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+        
+        /* Active Verse Display */
+        .active-display {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--hud-orange);
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            min-height: 80px;
+        }
+        
+        #verse-title { color: var(--hud-blue); margin: 0 0 10px 0; font-size: 1.5rem; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); }
+        .script-text { font-size: 1.1rem; font-weight: bold; line-height: 1.5; color: #fff;}
+        .kannada-text { color: #A8DADC; font-size: 0.95rem; margin-top: 5px;}
+
+        /* Global Controls */
+        .main-controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        
+        button { cursor: pointer; border: none; outline: none; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease; border-radius: 5px;}
+        
+        .btn-global { background: transparent; color: var(--hud-orange); border: 2px solid var(--hud-orange); padding: 12px 20px; font-size: 0.9rem; }
+        .btn-global:hover { background: var(--hud-orange); color: var(--bg-dark); box-shadow: 0 0 15px rgba(255, 140, 0, 0.6); }
+
+        /* Level Grid */
+        h3 { color: #64FFDA; font-size: 1rem; margin-bottom: 15px; text-transform: uppercase; border-bottom: 1px solid rgba(100, 255, 218, 0.3); padding-bottom: 5px;}
+        
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
 
-        .script-text { font-size: 1.3rem; line-height: 1.6; font-weight: bold; }
-        .kannada-text { color: #A8DADC; font-size: 1.1rem; }
+        /* Custom Scrollbar */
+        .level-grid::-webkit-scrollbar { width: 6px; }
+        .level-grid::-webkit-scrollbar-thumb { background: var(--hud-blue); border-radius: 3px; }
 
-        /* Chunky Controls */
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        }
-
-        button {
-            cursor: pointer;
-            border: none;
-            outline: none;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-play {
-            background: var(--hud-orange);
-            color: var(--bg-dark);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            box-shadow: 0 0 20px rgba(255, 140, 0, 0.6);
-        }
-
-        .btn-play:active { transform: scale(0.95); }
-
-        .btn-loop {
-            background: transparent;
+        .btn-level {
+            background: var(--btn-bg);
             color: var(--hud-blue);
-            border: 2px solid var(--hud-blue);
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 0.9rem;
+            border: 1px solid var(--hud-blue);
+            padding: 15px 0;
+            font-size: 1.1rem;
+            border-radius: 8px;
         }
+        
+        .btn-level:hover { background: rgba(0, 229, 255, 0.3); box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); transform: scale(1.05); }
+        .btn-level.active { background: var(--hud-blue); color: var(--bg-dark); box-shadow: 0 0 15px rgba(0, 229, 255, 0.8); }
 
-        .btn-loop.active {
-            background: var(--hud-blue);
-            color: var(--bg-dark);
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
-        }
+        .status { margin-top: 20px; font-size: 0.8rem; color: #A8DADC; }
 
-        .status-text {
-            margin-top: 20px;
-            font-size: 0.85rem;
-            color: #64FFDA;
-            letter-spacing: 1px;
-        }
     </style>
 </head>
 <body>
 
     <div class="hud-container">
         <h1>Mission Audio Log</h1>
-        <h2 id="verse-title">Loading...</h2>
-
-        <div class="lyrics-box">
-            <div id="text-hindi" class="script-text">...</div>
-            <div id="text-kannada" class="kannada-text">...</div>
+        
+        <div class="active-display">
+            <h2 id="verse-title">Select a Level</h2>
+            <div id="text-hindi" class="script-text">Awaiting input...</div>
+            <div id="text-kannada" class="kannada-text"></div>
         </div>
 
-        <audio id="audio-player"></audio>
+        <audio id="master-audio" src="audio/hanuman_chalisa_full.mp3" preload="metadata"></audio>
 
-        <div class="controls">
-            <button id="btn-play" class="btn-play">▶ PLAY</button>
-            <button id="btn-loop" class="btn-loop">↻ LOOP</button>
+        <div class="main-controls">
+            <button id="btn-play-all" class="btn-global">▶ Play Full Track</button>
+            <button id="btn-stop" class="btn-global">⏹ Stop</button>
         </div>
 
-        <div id="status-text" class="status-text">SYSTEM READY</div>
+        <h3>Select Your Quest Level</h3>
+        <div id="grid-container" class="level-grid"></div>
+
+        <div id="status-text" class="status">SYSTEM READY</div>
     </div>
 
     <script>
-        // --- 1. YOUR VERSE DATABASE ---
-        // Add all 40 Chaupais and Dohas here. 
-        // Ensure you have an "audio" folder in your GitHub repo with these MP3 files.
-        const verseDatabase = {
-            "1": {
-                title: "Chaupai 1",
-                hindi: "जय हनुमान ज्ञान गुन सागर ।\nजय कपीस तिहुँ लोक उजागर ॥",
-                kannada: "ಜಯ ಹನುಮಾನ ಜ್ಞಾನ ಗುಣ ಸಾಗರ ।\nಜಯ ಕಪೀಸ ತಿಹುಂ ಲೋಕ ಉಜಾಗರ ॥",
-                audioFile: "audio/chaupai_01.mp3"
-            },
-            "23": {
-                title: "Chaupai 23",
-                hindi: "आपन तेज सम्हारो आपै ।\nतीनों लोक हाँक तें काँपै ॥",
-                kannada: "ಆಪನ ತೇಜ ಸಂಹಾರೋ ಆಪೈ ।\nತೀನೋಂ ಲೋಕ ಹಾಂಕ ತೇಂ ಕಾಂಪೈ ॥",
-                audioFile: "audio/chaupai_23.mp3"
-            },
-            "doha-final": {
-                title: "Final Doha",
-                hindi: "पवन तनय संकट हरन, मंगल मूरति रूप ।\nराम लखन सीता सहित, हृदय बसहु सुर भूप ॥",
-                kannada: "ಪವನ ತನಯ ಸಂಕಟ ಹರನ, ಮಂಗಲ ಮೂರತಿ ರೂಪ ।\nರಾಮ ಲಖನ ಸೀತಾ ಸಹಿತ, ಹೃದಯ ಬಸಹು ಸುರ ಭೂಪ ॥",
-                audioFile: "audio/doha_final.mp3"
-            }
-        };
+        // --- 1. THE MASTER TIMESTAMP DATABASE ---
+        // IMPORTANT: You must find the exact start and end times (IN SECONDS) 
+        // for your specific MP3 file and enter them here.
+        // Example: If Chaupai 1 starts at 0:15 and ends at 0:22, start is 15.0, end is 22.0.
+        // If Chaupai 2 starts at 1 minute and 5 seconds, start is 65.0.
 
-        // --- 2. URL ROUTING LOGIC ---
-        // This checks the URL for "?v=23" (e.g. yourwebsite.com/?v=23)
-        const urlParams = new URLSearchParams(window.location.search);
-        let requestedVerse = urlParams.get('v');
+        const verseDatabase = [
+            { id: "intro", label: "Intro", title: "Opening Doha", start: 0.0, end: 14.5, hindi: "श्रीगुरु चरन सरोज रज...", kannada: "ಶ್ರೀಗುರು ಚರನ ಸರೋಜ ರಜ..." },
+            { id: "1", label: "01", title: "Level 01", start: 15.0, end: 22.0, hindi: "जय हनुमान ज्ञान गुन सागर...", kannada: "ಜಯ ಹನುಮಾನ ಜ್ಞಾನ ಗುಣ ಸಾಗರ..." },
+            { id: "2", label: "02", title: "Level 02", start: 22.5, end: 29.0, hindi: "राम दूत अतुलित बल धामा...", kannada: "ರಾಮ ದೂತ ಅತುಲಿತ ಬಲ ಧಾಮಾ..." },
+            // ... Add the rest of the levels up to 40 here ...
+            { id: "23", label: "23", title: "Level 23", start: 145.0, end: 152.0, hindi: "आपन तेज सम्हारो आपै...", kannada: "ಆಪನ ತೇಜ ಸಂಹಾರೋ ಆಪೈ..." },
+            // ...
+            { id: "40", label: "40", title: "Level 40", start: 280.0, end: 288.0, hindi: "तुलसीदास सदा हरि चेरा...", kannada: "ತುಲಸೀದಾಸ ಸದಾ ಹರಿ ಚೇರಾ..." },
+            { id: "outro", label: "End", title: "Final Doha", start: 289.0, end: 310.0, hindi: "पवन तनय संकट हरन...", kannada: "ಪವನ ತನಯ ಸಂಕಟ ಹರನ..." }
+        ];
 
-        // If no verse is requested in the URL, default to Chaupai 1
-        if (!requestedVerse || !verseDatabase[requestedVerse]) {
-            requestedVerse = "1"; 
+        // --- 2. SETUP VARIABLES ---
+        const audioPlayer = document.getElementById('master-audio');
+        const gridContainer = document.getElementById('grid-container');
+        const titleEl = document.getElementById('verse-title');
+        const hindiEl = document.getElementById('text-hindi');
+        const kannadaEl = document.getElementById('text-kannada');
+        const statusText = document.getElementById('status-text');
+        
+        let currentTargetEnd = null; // Tells the player when to pause
+        let isSegmentPlaying = false;
+
+        // --- 3. GENERATE THE GRID UI ---
+        function buildGrid() {
+            verseDatabase.forEach(verse => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-level';
+                btn.innerText = verse.label;
+                btn.onclick = () => playSegment(verse, btn);
+                gridContainer.appendChild(btn);
+            });
         }
 
-        const currentData = verseDatabase[requestedVerse];
+        // --- 4. PLAY SPECIFIC SEGMENT LOGIC ---
+        function playSegment(verse, clickedBtn) {
+            // Update UI Styling
+            document.querySelectorAll('.btn-level').forEach(b => b.classList.remove('active'));
+            if(clickedBtn) clickedBtn.classList.add('active');
 
-        // --- 3. INJECT DATA INTO UI ---
-        document.getElementById('verse-title').innerText = currentData.title;
-        document.getElementById('text-hindi').innerText = currentData.hindi;
-        document.getElementById('text-kannada').innerText = currentData.kannada;
-        
-        const audioPlayer = document.getElementById('audio-player');
-        audioPlayer.src = currentData.audioFile;
+            // Update Text Display
+            titleEl.innerText = verse.title;
+            hindiEl.innerText = verse.hindi;
+            kannadaEl.innerText = verse.kannada;
+            statusText.innerText = `TRANSMITTING LOG: ${verse.label}`;
 
-        // --- 4. PLAYER CONTROLS LOGIC ---
-        const btnPlay = document.getElementById('btn-play');
-        const btnLoop = document.getElementById('btn-loop');
-        const statusText = document.getElementById('status-text');
+            // Set Audio Timestamps and Play
+            audioPlayer.currentTime = verse.start;
+            currentTargetEnd = verse.end;
+            isSegmentPlaying = true;
+            
+            audioPlayer.play().catch(e => {
+                statusText.innerText = "ERROR: Please check audio file connection.";
+            });
+        }
 
-        let isPlaying = false;
-        let isLooping = false;
-
-        btnPlay.addEventListener('click', () => {
-            if (isPlaying) {
-                audioPlayer.pause();
-                btnPlay.innerText = "▶ PLAY";
-                statusText.innerText = "AUDIO PAUSED";
-            } else {
-                audioPlayer.play().catch(error => {
-                    statusText.innerText = "ERROR: Audio file not found.";
-                    console.error("Audio playback failed:", error);
-                });
-                btnPlay.innerText = "⏸ PAUSE";
-                statusText.innerText = "TRANSMITTING SIGNAL...";
-            }
-            isPlaying = !isPlaying;
-        });
-
-        btnLoop.addEventListener('click', () => {
-            isLooping = !isLooping;
-            audioPlayer.loop = isLooping;
-            if (isLooping) {
-                btnLoop.classList.add('active');
-                statusText.innerText = "LOOP MODE: ACTIVATED";
-            } else {
-                btnLoop.classList.remove('active');
-                statusText.innerText = "LOOP MODE: DEACTIVATED";
+        // --- 5. AUTO-STOP AT END OF SEGMENT ---
+        // This constantly checks the time to see if the segment is finished
+        audioPlayer.addEventListener('timeupdate', () => {
+            if (isSegmentPlaying && currentTargetEnd !== null) {
+                if (audioPlayer.currentTime >= currentTargetEnd) {
+                    audioPlayer.pause();
+                    isSegmentPlaying = false; // Stop tracking so they don't get stuck
+                    currentTargetEnd = null;
+                    statusText.innerText = "TRANSMISSION COMPLETE";
+                    document.querySelectorAll('.btn-level').forEach(b => b.classList.remove('active'));
+                }
             }
         });
 
-        audioPlayer.addEventListener('ended', () => {
-            if (!isLooping) {
-                isPlaying = false;
-                btnPlay.innerText = "▶ PLAY";
-                statusText.innerText = "TRANSMISSION COMPLETE";
-            }
-        });
+        // --- 6. GLOBAL CONTROLS ---
+        document.getElementById('btn-play-all').onclick = () => {
+            isSegmentPlaying = false; // Disable auto-stop
+            currentTargetEnd = null;
+            document.querySelectorAll('.btn-level').forEach(b => b.classList.remove('active'));
+            titleEl.innerText = "Full Master Track";
+            hindiEl.innerText = "Playing all verses...";
+            kannadaEl.innerText = "";
+            audioPlayer.currentTime = 0;
+            audioPlayer.play();
+            statusText.innerText = "PLAYING ENTIRE LOG";
+        };
+
+        document.getElementById('btn-stop').onclick = () => {
+            audioPlayer.pause();
+            isSegmentPlaying = false;
+            statusText.innerText = "AUDIO HALTED";
+            document.querySelectorAll('.btn-level').forEach(b => b.classList.remove('active'));
+        };
+
+        // Initialize App
+        buildGrid();
+
     </script>
 </body>
 </html>
