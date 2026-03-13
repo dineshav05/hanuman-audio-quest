@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Ocean - Audio Quest</title>
+    <style>
+        /* --- HOLOGRAPHIC HUD UI STYLES --- */
+        :root {
+            --bg-dark: #070B19;
+            --hud-blue: #00E5FF;
+            --hud-orange: #FF8C00;
+            --panel-bg: rgba(10, 25, 47, 0.85);
+            --text-light: #E6F1FF;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at center, #112240 0%, var(--bg-dark) 100%);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .hud-container {
+            background: var(--panel-bg);
+            border: 2px solid var(--hud-blue);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2), inset 0 0 15px rgba(0, 229, 255, 0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative HUD corner lines */
+        .hud-container::before, .hud-container::after {
+            content: ''; position: absolute; width: 40px; height: 40px;
+            border: 3px solid var(--hud-orange); border-radius: 5px;
+        }
+        .hud-container::before { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+        .hud-container::after { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+        h1 {
+            color: var(--hud-orange);
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            color: var(--hud-blue);
+            font-size: 2rem;
+            margin: 0 0 20px 0;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        .lyrics-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .script-text { font-size: 1.3rem; line-height: 1.6; font-weight: bold; }
+        .kannada-text { color: #A8DADC; font-size: 1.1rem; }
+
+        /* Chunky Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-play {
+            background: var(--hud-orange);
+            color: var(--bg-dark);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.6);
+        }
+
+        .btn-play:active { transform: scale(0.95); }
+
+        .btn-loop {
+            background: transparent;
+            color: var(--hud-blue);
+            border: 2px solid var(--hud-blue);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+        }
+
+        .btn-loop.active {
+            background: var(--hud-blue);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+        }
+
+        .status-text {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #64FFDA;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hud-container">
+        <h1>Mission Audio Log</h1>
+        <h2 id="verse-title">Loading...</h2>
+
+        <div class="lyrics-box">
+            <div id="text-hindi" class="script-text">...</div>
+            <div id="text-kannada" class="kannada-text">...</div>
+        </div>
+
+        <audio id="audio-player"></audio>
+
+        <div class="controls">
+            <button id="btn-play" class="btn-play">▶ PLAY</button>
+            <button id="btn-loop" class="btn-loop">↻ LOOP</button>
+        </div>
+
+        <div id="status-text" class="status-text">SYSTEM READY</div>
+    </div>
+
+    <script>
+        // --- 1. YOUR VERSE DATABASE ---
+        // Add all 40 Chaupais and Dohas here. 
+        // Ensure you have an "audio" folder in your GitHub repo with these MP3 files.
+        const verseDatabase = {
+            "1": {
+                title: "Chaupai 1",
+                hindi: "जय हनुमान ज्ञान गुन सागर ।\nजय कपीस तिहुँ लोक उजागर ॥",
+                kannada: "ಜಯ ಹನುಮಾನ ಜ್ಞಾನ ಗುಣ ಸಾಗರ ।\nಜಯ ಕಪೀಸ ತಿಹುಂ ಲೋಕ ಉಜಾಗರ ॥",
+                audioFile: "audio/chaupai_01.mp3"
+            },
+            "23": {
+                title: "Chaupai 23",
+                hindi: "आपन तेज सम्हारो आपै ।\nतीनों लोक हाँक तें काँपै ॥",
+                kannada: "ಆಪನ ತೇಜ ಸಂಹಾರೋ ಆಪೈ ।\nತೀನೋಂ ಲೋಕ ಹಾಂಕ ತೇಂ ಕಾಂಪೈ ॥",
+                audioFile: "audio/chaupai_23.mp3"
+            },
+            "doha-final": {
+                title: "Final Doha",
+                hindi: "पवन तनय संकट हरन, मंगल मूरति रूप ।\nराम लखन सीता सहित, हृदय बसहु सुर भूप ॥",
+                kannada: "ಪವನ ತನಯ ಸಂಕಟ ಹರನ, ಮಂಗಲ ಮೂರತಿ ರೂಪ ।\nರಾಮ ಲಖನ ಸೀತಾ ಸಹಿತ, ಹೃದಯ ಬಸಹು ಸುರ ಭೂಪ ॥",
+                audioFile: "audio/doha_final.mp3"
+            }
+        };
+
+        // --- 2. URL ROUTING LOGIC ---
+        // This checks the URL for "?v=23" (e.g. yourwebsite.com/?v=23)
+        const urlParams = new URLSearchParams(window.location.search);
+        let requestedVerse = urlParams.get('v');
+
+        // If no verse is requested in the URL, default to Chaupai 1
+        if (!requestedVerse || !verseDatabase[requestedVerse]) {
+            requestedVerse = "1"; 
+        }
+
+        const currentData = verseDatabase[requestedVerse];
+
+        // --- 3. INJECT DATA INTO UI ---
+        document.getElementById('verse-title').innerText = currentData.title;
+        document.getElementById('text-hindi').innerText = currentData.hindi;
+        document.getElementById('text-kannada').innerText = currentData.kannada;
+        
+        const audioPlayer = document.getElementById('audio-player');
+        audioPlayer.src = currentData.audioFile;
+
+        // --- 4. PLAYER CONTROLS LOGIC ---
+        const btnPlay = document.getElementById('btn-play');
+        const btnLoop = document.getElementById('btn-loop');
+        const statusText = document.getElementById('status-text');
+
+        let isPlaying = false;
+        let isLooping = false;
+
+        btnPlay.addEventListener('click', () => {
+            if (isPlaying) {
+                audioPlayer.pause();
+                btnPlay.innerText = "▶ PLAY";
+                statusText.innerText = "AUDIO PAUSED";
+            } else {
+                audioPlayer.play().catch(error => {
+                    statusText.innerText = "ERROR: Audio file not found.";
+                    console.error("Audio playback failed:", error);
+                });
+                btnPlay.innerText = "⏸ PAUSE";
+                statusText.innerText = "TRANSMITTING SIGNAL...";
+            }
+            isPlaying = !isPlaying;
+        });
+
+        btnLoop.addEventListener('click', () => {
+            isLooping = !isLooping;
+            audioPlayer.loop = isLooping;
+            if (isLooping) {
+                btnLoop.classList.add('active');
+                statusText.innerText = "LOOP MODE: ACTIVATED";
+            } else {
+                btnLoop.classList.remove('active');
+                statusText.innerText = "LOOP MODE: DEACTIVATED";
+            }
+        });
+
+        audioPlayer.addEventListener('ended', () => {
+            if (!isLooping) {
+                isPlaying = false;
+                btnPlay.innerText = "▶ PLAY";
+                statusText.innerText = "TRANSMISSION COMPLETE";
+            }
+        });
+    </script>
+</body>
+</html>
