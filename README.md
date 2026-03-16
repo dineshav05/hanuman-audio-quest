@@ -14,9 +14,9 @@ This repository hosts the lightweight Single Page Application (SPA) that acts as
 ## 🚀 Live Demo
 
 You can access the live application here: 
-**[INSERT YOUR GITHUB PAGES URL HERE]** *(e.g., https://dineshavishwanatha.github.io/hanuman-audio-quest/)*
+(https://dineshav05.github.io/hanuman-audio-quest/)
 
-* Try jumping to a specific level: `[YOUR URL]/?v=9`
+/* Try jumping to a specific level: `[(https://dineshav05.github.io/hanuman-audio-quest/?v=9)]` */
 
 ## 📁 Repository Structure
 
